@@ -14,6 +14,7 @@ import { ConfigService, getConfigToken } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { resetPasswordDemandDto } from './dto/resetPasswordDemandDto'
 import { ResetPasswordConfirmationDto } from './dto/resetPasswordConfirmationDto'
+import { DeleteAccountDto } from "./dto/deleteAccountDto";
 
 @Injectable()
 export class AuthService {
@@ -108,5 +109,18 @@ export class AuthService {
             data: { password: hash },
         })
         return { data: 'Password updated' }
+    }
+
+    async deleteAccount(userId: any, deleteAccountDto: DeleteAccountDto) {
+        const {password} = deleteAccountDto
+        const user = await this.prismaService.user.findUnique({
+            where: { userId },
+        })
+        if (!user) throw new ConflictException('user not found')
+
+        const match = await bcrypt.compare(password, user.password)
+        if(!match) throw new UnauthorizedException('Password does not match')
+        await this.prismaService.user.delete({where: {userId}})
+        return {data: 'User successfully deleted'}
     }
 }

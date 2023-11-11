@@ -6,6 +6,7 @@ import { resetPasswordDemandDto } from './dto/resetPasswordDemandDto'
 import { ResetPasswordConfirmationDto } from './dto/resetPasswordConfirmationDto'
 import { AuthGuard } from '@nestjs/passport'
 import { Request } from 'express'
+import { DeleteAccountDto } from "./dto/deleteAccountDto";
 
 @Controller('auth')
 export class AuthController {
@@ -35,7 +36,8 @@ export class AuthController {
 
     @UseGuards(AuthGuard('jwt'))
     @Delete('delete')
-    deleteAccount(@Req() request: Request) {
-        return request.user
+    deleteAccount(@Req() request: Request, @Body() deleteAccountDto: DeleteAccountDto) {
+        const userdId =  request.user["userdId"]
+        return this.authService.deleteAccount(userdId,deleteAccountDto )
     }
 }
